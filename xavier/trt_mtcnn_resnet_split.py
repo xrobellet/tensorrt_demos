@@ -372,9 +372,35 @@ def mtcnn_split (X_img_path, mtcnn, device = None):
         result = x_aligned.to(device)
         #print(result)
 
-    t1_end = perf_counter()
-    return print(f"done {X_img_path} Elapsed total time: {t1_end-t1_start}")#" mtccn: {t2-t1_start} getfaces: {t3-t2} resnet: {t5-t3} predi: {t7-t5}")
+        t1_end = perf_counter()
+        print(f"done {X_img_path} Elapsed total time: {t1_end-t1_start}")#" mtccn: {t2-t1_start} getfaces: {t3-t2} resnet: {t5-t3} predi: {t7-t5}")
+        return result
+    else:
+        return None
 
+def resnet_split(x_aligned, resnet, distance_min=0.3, distance_threshold=0.7, k=3, device=None):
+    for result in x_aligned:
+        if result is not None:
+            t3 = perf_counter()
+            result = result.to(device)
+            t3 = perf_counter()
+            predict = resnet(result).detach().cpu()
+            t5 = perf_counter()
+
+            for face in predict:
+                #print(face)
+                neighbors = getKNeighbors(embeddings_db, names, face, k)
+                predi, are_matches = getResponse(neighbors, distance_threshold, distance_min)
+
+                name = "Unknown"
+
+                if are_matches:
+                    name = unidecode(predi)      
+
+                print(name)
+            t6 = perf_counter()
+            print(f"time resnet+classification = {t6-t3}")
+    return print(f"Done")
 
 def main():
     args = parse_args()
@@ -387,22 +413,23 @@ def main():
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('Running on device: {}'.format(device))
 
-    mtcnn = TrtMtcnn()
-    #resnet = TRTModule()
+    #mtcnn = TrtMtcnn()
+    resnet = TRTModule()
 
-    #resnet.load_state_dict(torch.load('/resnet.trt'))
+    resnet.load_state_dict(torch.load('/resnet.trt'))
 
-    #Loading database and name
-    with open('/facenet_pytorch/data/2020_12_17_tensors_faces_db_embeedings.pkl', 'rb') as f:
+    with open('./facenet_pytorch/data/2020_12_17_tensors_faces_db_embeedings.pkl', 'rb') as f:
         embeddings_db = pickle.load(f)
 
     with open('/facenet_pytorch/data/2020_12_17_Tensorsnames_residents.pkl', 'rb') as f:
         names = pickle.load(f)
 
-    for file in os.listdir('/facenet_pytorch/data/pictures_blog_update/'):
-        full_path = '/facenet_pytorch/data/pictures_blog_update/' + file
-        #identify (full_path, mtcnn, resnet, embeddings_db=embeddings_db, names=names, distance_min=0.3, distance_threshold=0.7, k=3, num=0, device=device)
-        mtcnn_split(full_path, mtcnn, device=device)
+    with open('./face_list.pkl', 'rb') as f:
+        face_list = pickle.load(f)
+
+
+    #define the model:
+    resnet_split(face_list, resnet, distance_min=0.3, distance_threshold=0.7, k=3, device=device)
     #open_window(
     #    WINDOW_NAME, 'Camera TensorRT MTCNN Demo for Jetson Nano',
     #    cam.img_width, cam.img_height)
