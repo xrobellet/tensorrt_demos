@@ -369,7 +369,7 @@ def mtcnn_split (X_img_path, mtcnn, device = None):
 
     if x_aligned is not None:
         print("num_faces_detect: ", len(x_aligned))
-        result = x_aligned.to(device)
+        #result = x_aligned.to(device)
         #print(result)
 
         t1_end = perf_counter()
@@ -395,11 +395,11 @@ def main():
     #resnet.load_state_dict(torch.load('/resnet.trt'))
 
     #Loading database and name
-    with open('/facenet_pytorch/data/2020_12_17_tensors_faces_db_embeedings.pkl', 'rb') as f:
-        embeddings_db = pickle.load(f)
+    #with open('/facenet_pytorch/data/2020_12_17_tensors_faces_db_embeedings.pkl', 'rb') as f:
+    #    embeddings_db = pickle.load(f)
 
-    with open('/facenet_pytorch/data/2020_12_17_Tensorsnames_residents.pkl', 'rb') as f:
-        names = pickle.load(f)
+    #with open('/facenet_pytorch/data/2020_12_17_Tensorsnames_residents.pkl', 'rb') as f:
+    #    names = pickle.load(f)
 
     tensors_list =[]
     for file in os.listdir('/facenet_pytorch/data/pictures_blog_update/'):
@@ -410,6 +410,8 @@ def main():
     
     with open('./faces_list.pkl', 'wb') as f:
         pickle.dump(tensors_list, f)
+    
+    return print (tensors_list)
     #open_window(
     #    WINDOW_NAME, 'Camera TensorRT MTCNN Demo for Jetson Nano',
     #    cam.img_width, cam.img_height)

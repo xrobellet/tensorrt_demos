@@ -430,7 +430,7 @@ def main():
 
 
     #define the model:
-    resnet_split(face_list, resnet, embeddings_db=embeddings_db, names=names distance_min=0.3, distance_threshold=0.7, k=3, device=device)
+    resnet_split(face_list, resnet, embeddings_db=embeddings_db, names=names, distance_min=0.3, distance_threshold=0.7, k=3, device=device)
     #open_window(
     #    WINDOW_NAME, 'Camera TensorRT MTCNN Demo for Jetson Nano',
     #    cam.img_width, cam.img_height)
