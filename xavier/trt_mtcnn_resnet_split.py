@@ -14,6 +14,7 @@ import os
 import pickle
 import math
 from time import perf_counter
+from unidecode import unidecode
 from shutil import copyfile
 from time import perf_counter
 from torch2trt import TRTModule
@@ -378,7 +379,7 @@ def mtcnn_split (X_img_path, mtcnn, device = None):
     else:
         return None
 
-def resnet_split(x_aligned, resnet, distance_min=0.3, distance_threshold=0.7, k=3, device=None):
+def resnet_split(x_aligned, resnet,embeddings_db=None, names=None, distance_min=0.3, distance_threshold=0.7, k=3, device=None):
     for result in x_aligned:
         if result is not None:
             t3 = perf_counter()
@@ -418,18 +419,18 @@ def main():
 
     resnet.load_state_dict(torch.load('/resnet.trt'))
 
-    with open('./facenet_pytorch/data/2020_12_17_tensors_faces_db_embeedings.pkl', 'rb') as f:
+    with open('/facenet_pytorch/data/2020_12_17_tensors_faces_db_embeedings.pkl', 'rb') as f:
         embeddings_db = pickle.load(f)
 
     with open('/facenet_pytorch/data/2020_12_17_Tensorsnames_residents.pkl', 'rb') as f:
         names = pickle.load(f)
 
-    with open('./face_list.pkl', 'rb') as f:
+    with open('./faces_list.pkl', 'rb') as f:
         face_list = pickle.load(f)
 
 
     #define the model:
-    resnet_split(face_list, resnet, distance_min=0.3, distance_threshold=0.7, k=3, device=device)
+    resnet_split(face_list, resnet, embeddings_db=embeddings_db, names=names distance_min=0.3, distance_threshold=0.7, k=3, device=device)
     #open_window(
     #    WINDOW_NAME, 'Camera TensorRT MTCNN Demo for Jetson Nano',
     #    cam.img_width, cam.img_height)
